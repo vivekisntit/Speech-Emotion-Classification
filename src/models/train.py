@@ -3,15 +3,24 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
-
+from sklearn.utils.class_weight import compute_class_weight
 from src.models.cnn_model import build_model
 from src.config.config import DATA_PROCESSED, MODEL_DIR
-
+from sklearn.utils.class_weight import compute_class_weight
 
 def train():
 
     X = joblib.load(DATA_PROCESSED + "/X.joblib")
     y = joblib.load(DATA_PROCESSED + "/y.joblib")
+
+    classes = np.unique(y)
+
+    weights = compute_class_weight(
+        class_weight="balanced",
+        classes=classes,
+        y=y
+    )
+    class_weights = dict(zip(classes, weights))
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y,
@@ -28,8 +37,9 @@ def train():
         X_train,
         y_train,
         batch_size=16,
-        epochs=50,
-        validation_data=(X_test, y_test)
+        epochs=120,
+        validation_data=(X_test, y_test),
+        class_weight=class_weights
     )
 
     predictions = model.predict(X_test)
