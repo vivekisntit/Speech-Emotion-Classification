@@ -12,7 +12,6 @@ data/raw/
 *.mp3
 *.flac
 *.ogg
-models/*.h5
 models/*.pt
 models/*.pth
 *.log

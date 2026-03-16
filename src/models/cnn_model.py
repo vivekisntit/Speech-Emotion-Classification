@@ -1,10 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Conv1D, Activation, Dropout, Flatten, Dense
-
 def build_model():
-
     model = Sequential()
-
     model.add(
         Conv1D(
             128,
@@ -30,5 +27,4 @@ def build_model():
         optimizer="rmsprop",
         metrics=["accuracy"]
     )
-
     return model
