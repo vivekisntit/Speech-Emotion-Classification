@@ -7,7 +7,7 @@ env/
 .venv/
 .ipynb_checkpoints/
 data/raw/
-data/processed/
+
 *.wav
 *.mp3
 *.flac

@@ -1,26 +1,18 @@
 import joblib
 import numpy as np
-
+import os
+import json
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.utils.class_weight import compute_class_weight
+
 from src.models.cnn_model import build_model
 from src.config.config import DATA_PROCESSED, MODEL_DIR
-from sklearn.utils.class_weight import compute_class_weight
+
 
 def train():
 
     X = joblib.load(DATA_PROCESSED + "/X.joblib")
     y = joblib.load(DATA_PROCESSED + "/y.joblib")
-
-    classes = np.unique(y)
-
-    weights = compute_class_weight(
-        class_weight="balanced",
-        classes=classes,
-        y=y
-    )
-    class_weights = dict(zip(classes, weights))
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y,
@@ -37,9 +29,8 @@ def train():
         X_train,
         y_train,
         batch_size=16,
-        epochs=120,
-        validation_data=(X_test, y_test),
-        class_weight=class_weights
+        epochs=50,
+        validation_data=(X_test, y_test)
     )
 
     predictions = model.predict(X_test)
@@ -49,6 +40,11 @@ def train():
     print(confusion_matrix(y_test, predictions))
 
     model.save(MODEL_DIR + "/emotion_model.h5")
+
+    os.makedirs("reports", exist_ok=True)
+
+    with open("reports/training_history.json", "w") as f:
+        json.dump(history.history, f)
 
 
 if __name__ == "__main__":

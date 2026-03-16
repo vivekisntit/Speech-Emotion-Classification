@@ -3,8 +3,7 @@ import pandas as pd
 
 from src.config.config import DATA_RAW
 
-
-RAVDESS_MAP = {
+EMOTION_MAP = {
     "01": "neutral",
     "02": "calm",
     "03": "happy",
@@ -14,61 +13,6 @@ RAVDESS_MAP = {
     "07": "disgust",
     "08": "surprised"
 }
-
-CREMA_MAP = {
-    "NEU": "neutral",
-    "HAP": "happy",
-    "SAD": "sad",
-    "ANG": "angry",
-    "FEA": "fearful",
-    "DIS": "disgust"
-}
-
-SAVEE_MAP = {
-    "a": "angry",
-    "d": "disgust",
-    "f": "fearful",
-    "h": "happy",
-    "n": "neutral",
-    "sa": "sad",
-    "su": "surprised"
-}
-
-
-def parse_ravdess(file):
-    parts = file.split("-")
-    emotion_code = parts[2]
-    return RAVDESS_MAP.get(emotion_code)
-
-
-def parse_tess(file):
-    emotion = file.split("_")[-1].replace(".wav", "").lower()
-
-    if emotion == "fear":
-        return "fearful"
-
-    if emotion == "ps":
-        return "surprised"
-
-    return emotion
-
-
-def parse_crema(file):
-    parts = file.split("_")
-    emotion_code = parts[2]
-    return CREMA_MAP.get(emotion_code)
-
-
-def parse_savee(file):
-    code = file.split("_")[1]
-
-    if code.startswith("sa"):
-        return "sad"
-
-    if code.startswith("su"):
-        return "surprised"
-
-    return SAVEE_MAP.get(code[0])
 
 
 def build_metadata():
@@ -84,27 +28,33 @@ def build_metadata():
 
             filepath = os.path.join(root, file)
 
-            if "ravdess" in root.lower():
+            # RAVDESS files follow numeric naming
+            if "-" in file:
 
-                emotion = parse_ravdess(file)
+                parts = file.split("-")
 
-            elif "tess" in root.lower():
+                emotion_code = parts[2]
 
-                emotion = parse_tess(file)
-
-            elif "crema" in root.lower():
-
-                emotion = parse_crema(file)
-
-            elif "savee" in root.lower():
-
-                emotion = parse_savee(file)
+                emotion = EMOTION_MAP.get(emotion_code, "unknown")
 
             else:
-                continue
+                # TESS naming example: OAF_angry.wav
+                name = file.lower()
 
-            if emotion is None:
-                continue
+                if "angry" in name:
+                    emotion = "angry"
+                elif "happy" in name:
+                    emotion = "happy"
+                elif "sad" in name:
+                    emotion = "sad"
+                elif "fear" in name:
+                    emotion = "fearful"
+                elif "disgust" in name:
+                    emotion = "disgust"
+                elif "ps" in name or "surprise" in name:
+                    emotion = "surprised"
+                else:
+                    emotion = "neutral"
 
             rows.append({
                 "filepath": filepath,
@@ -113,9 +63,11 @@ def build_metadata():
 
     df = pd.DataFrame(rows)
 
+    os.makedirs("data", exist_ok=True)
+
     df.to_csv("data/metadata.csv", index=False)
 
-    print("Metadata created:", df.shape)
+    print("Metadata created:", len(df), "files")
 
 
 if __name__ == "__main__":

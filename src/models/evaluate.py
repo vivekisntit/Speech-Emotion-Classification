@@ -1,4 +1,5 @@
 import os
+import json
 import joblib
 import numpy as np
 import seaborn as sns
@@ -81,6 +82,45 @@ def evaluate():
 
     print("\nConfusion matrix saved to reports/")
 
+def plot_training_curves():
+
+    history_path = os.path.join("reports", "training_history.json")
+
+    if not os.path.exists(history_path):
+        print("Training history not found.")
+        return
+
+    with open(history_path, "r") as f:
+        history = json.load(f)
+
+    # Accuracy plot
+    plt.figure()
+
+    plt.plot(history["accuracy"], label="train")
+    plt.plot(history["val_accuracy"], label="validation")
+
+    plt.title("Model Accuracy")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.legend()
+
+    plt.savefig("reports/model_accuracy.png")
+
+    # Loss plot
+    plt.figure()
+
+    plt.plot(history["loss"], label="train")
+    plt.plot(history["val_loss"], label="validation")
+
+    plt.title("Model Loss")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.legend()
+
+    plt.savefig("reports/model_loss.png")
+
+    print("Training curves saved.")
 
 if __name__ == "__main__":
     evaluate()
+    plot_training_curves()

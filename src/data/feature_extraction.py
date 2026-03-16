@@ -5,7 +5,7 @@ import numpy as np
 import joblib
 
 from src.config.config import DATA_PROCESSED
-from sklearn.preprocessing import StandardScaler
+
 
 EMOTION_LABELS = {
     "neutral": 0,
@@ -53,8 +53,6 @@ def extract_features():
 
     X = np.array(X)
     y = np.array(y)
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
 
     os.makedirs(DATA_PROCESSED, exist_ok=True)
 
